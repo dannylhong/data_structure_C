@@ -10,19 +10,7 @@ typedef struct NODE {
 } NODE;
 
 NODE* g_pHead = NULL;
-
-void PrintList(void)
-{
-	NODE* pTmp = g_pHead;
-	while (pTmp != NULL)
-	{
-		printf("[%p] %s, next[%p]\n",
-			pTmp, pTmp->szData, pTmp->next);
-		pTmp = pTmp->next;
-	}
-
-	putchar('\n');
-}
+NODE* g_pTail = NULL;
 
 int IsEmpty()
 {
@@ -32,30 +20,70 @@ int IsEmpty()
 	return 0;
 }
 
-void InsertAtHead(char* pszData)
-{
-	NODE* pTmp = (NODE*)malloc(sizeof(NODE));
-	memset(pTmp, 0, sizeof(NODE));
-	strcpy(pTmp->szData, pszData);
-
-	pTmp->next = g_pHead;
-	g_pHead = pTmp;
-}
-
-int InsertAtTail(char* pszData)
+void PrintList(void)
 {
 	NODE* pTmp = g_pHead;
-	while (pTmp->next != NULL)
+	while (pTmp != NULL)
+	{
+		printf("[%p] %s, next[%p]\n",
+				pTmp, pTmp->szData, pTmp->next);
 		pTmp = pTmp->next;
+	}
+	printf("head[%p] , tail[%p]\n",
+				g_pHead, g_pTail);
+	if(IsEmpty()) printf("[%p] List is empty\n", g_pHead);
+	putchar('\n');
+}
 
+void PrintListRec(NODE* pTmp)
+{
+	if (pTmp == NULL)
+	{
+		printf("head[%p] , tail[%p]\n",
+				g_pHead, g_pTail);
+		return;
+	}
+	printf("[%p] %s, next[%p]\n",
+			pTmp, pTmp->szData, pTmp->next);
+	PrintListRec(pTmp->next);
+}
+
+void InsertAtHead(char* pszData)
+{
 	NODE* pNode = (NODE*)malloc(sizeof(NODE));
 	memset(pNode, 0, sizeof(NODE));
 	strcpy(pNode->szData, pszData);
 
-	pTmp->next = pNode;
-    pNode->next = NULL; //implied in memset
+	if(IsEmpty()) g_pTail = pNode;
+	pNode->next = g_pHead;
+	g_pHead = pNode;
 }
 
+void AppendAtTail(char* pszData)
+{
+	NODE* pNode = (NODE*)malloc(sizeof(NODE));
+	memset(pNode, 0, sizeof(NODE));
+	strcpy(pNode->szData, pszData);
+
+	if(IsEmpty()) g_pHead = pNode;
+	else		  g_pTail->next = pNode;
+	g_pTail = pNode;
+
+#if 0 //when not using g_pTail
+	if(IsEmpty()){
+		g_pHead = pNode;
+		// pNode->next = NULL; //implied in memset
+		return;
+	}
+
+	NODE* pTmp = g_pHead;
+	while (pTmp->next != NULL)
+		pTmp = pTmp->next;
+
+    pTmp->next = pNode;
+    // pNode->next = NULL; //implied in memset
+#endif	
+}
 
 void ReleaseList(void)
 {
@@ -69,43 +97,67 @@ void ReleaseList(void)
 		free(pDelete);
 	}
     g_pHead = NULL;
+	g_pTail = NULL;
 }
-
-int FindData(char* pszData)
-{
-	NODE* pTmp = g_pHead;
-	while (pTmp != NULL)
-	{
-		if (strcmp(pTmp->szData, pszData) == 0)
-			return 1;
-		pTmp = pTmp->next;
-	}
-
-	return 0;
-}
-
 
 int DeleteData(char* pszData)
 {
-	NODE* pCur = g_pHead->next;
-	NODE* pPrev = g_pHead;
+	NODE* pCur = g_pHead;
+	NODE* pPre;
 	while (pCur != NULL)
 	{
 		if (strcmp(pCur->szData, pszData) == 0)
 		{
-			printf("DeleteData(): %s\n", pCur->szData);
-			pPrev->next = pCur->next;
+			printf("DeleteData():[%p] %s next[%p]\n", 
+					pCur, pCur->szData, pCur->next);
+			if (pCur == g_pHead) g_pHead = pCur->next;
+			else                 pPre->next = pCur->next;
+
+			
+			if (pCur == g_pTail){
+				if (g_pTail == g_pHead) // If the only one element is being deleted...
+					g_pTail = NULL;
+				else
+					g_pTail = pPre;	
+			} 
+
 			free(pCur);
 			return 1;
 		}
-
+		pPre = pCur;
 		pCur = pCur->next;
-		pPrev = pPrev->next;
 	}
 
 	return 0;
 }
 
+void ReverseList(){
+	g_pTail = g_pHead;
+
+    NODE * pCur, * pPrev, * pNext;
+    pCur = g_pHead;
+    pPrev = NULL;
+    while(pCur != NULL)
+    {
+        pNext = pCur->next;
+        pCur->next = pPrev;
+        pPrev = pCur;
+        pCur = pNext;
+    }
+    g_pHead = pPrev;
+}
+
+void ReverseListRec(NODE * pTmp){
+    if(pTmp->next == NULL)
+    {
+		g_pTail = g_pHead;
+        g_pHead = pTmp;
+        return;
+    }
+    ReverseListRec(pTmp->next);
+    pTmp->next->next = pTmp;
+    pTmp->next = NULL;
+}
 
 int main()
 {
@@ -115,13 +167,18 @@ int main()
 	InsertAtHead("TEST03");
 	PrintList();
 
-	if (FindData("TEST01") == 1)
-		printf("FindData(): TEST01 found\n");
-	if (FindData("TEST02") == 1)
-		printf("FindData(): TEST02 found\n");
-	if (FindData("TEST03") == 1)
-		printf("FindData(): TEST03 found\n");
-	putchar('\n');
+	DeleteData("TEST01");
+	PrintList();
+	DeleteData("TEST02");
+	PrintList();
+	DeleteData("TEST03");
+	PrintList();
+
+	puts("*** AppendAtTail() ***");
+	AppendAtTail("TEST01");
+	AppendAtTail("TEST02");
+	AppendAtTail("TEST03");
+	PrintList();
 
 	DeleteData("TEST01");
 	PrintList();
@@ -130,27 +187,18 @@ int main()
 	DeleteData("TEST03");
 	PrintList();
 
-	puts("*** InsertAtTail() ***");
-	InsertAtTail("TEST01");
-	InsertAtTail("TEST02");
-	InsertAtTail("TEST03");
+	puts("*** InsertAtHead() ***");
+	InsertAtHead("TEST01");
+	InsertAtHead("TEST02");
+	InsertAtHead("TEST03");
 	PrintList();
+	puts("*** ReverseList() ***");
+	ReverseList();
+	PrintListRec(g_pHead);
 
-
-	if (FindData("TEST01") == 1)
-		printf("FindData(): TEST01 found\n");
-	if (FindData("TEST02") == 1)
-		printf("FindData(): TEST02 found\n");
-	if (FindData("TEST03") == 1)
-		printf("FindData(): TEST03 found\n");
-	putchar('\n');
-
-	DeleteData("TEST01");
-	PrintList();
-	DeleteData("TEST02");
-	PrintList();
-	DeleteData("TEST03");
-	PrintList();
+	puts("*** ReverseListRec() ***");
+	ReverseListRec(g_pHead);
+	PrintListRec(g_pHead);
 
 	ReleaseList();
 	return 0;
