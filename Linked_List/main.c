@@ -70,7 +70,8 @@ void AppendAtTail(char* pszData)
 	g_pTail = pNode;
 
 #if 0 //when not using g_pTail
-	if(IsEmpty()){
+	if(IsEmpty())
+	{
 		g_pHead = pNode;
 		// pNode->next = NULL; //implied in memset
 		return;
@@ -112,7 +113,6 @@ int DeleteData(char* pszData)
 					pCur, pCur->szData, pCur->next);
 			if (pCur == g_pHead) g_pHead = pCur->next;
 			else                 pPre->next = pCur->next;
-
 			
 			if (pCur == g_pTail){
 				if (g_pTail == g_pHead) // If the only one element is being deleted...
