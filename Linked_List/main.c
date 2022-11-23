@@ -6,13 +6,14 @@
 
 typedef struct NODE {
 	char szData[MAX_STR_LEN];
+
 	struct NODE* next;
 } NODE;
 
 NODE* g_pHead = NULL;
 NODE* g_pTail = NULL;
 
-int IsEmpty()
+int IsListEmpty()
 {
 	if (g_pHead == NULL)
 		return 1;
@@ -31,11 +32,11 @@ void PrintList(void)
 	}
 	printf("head[%p] , tail[%p]\n",
 				g_pHead, g_pTail);
-	if(IsEmpty()) printf("[%p] List is empty\n", g_pHead);
+	if(IsListEmpty()) puts("List is empty");
 	putchar('\n');
 }
 
-void PrintListRec(NODE* pTmp)
+void PrintListRecursion(NODE* pTmp)
 {
 	if (pTmp == NULL)
 	{
@@ -45,32 +46,32 @@ void PrintListRec(NODE* pTmp)
 	}
 	printf("[%p] %s, next[%p]\n",
 			pTmp, pTmp->szData, pTmp->next);
-	PrintListRec(pTmp->next);
+	PrintListRecursion(pTmp->next);
 }
 
-void InsertAtHead(char* pszData)
+void InsertNodeAtHead(char* pszData)
 {
 	NODE* pNode = (NODE*)malloc(sizeof(NODE));
 	memset(pNode, 0, sizeof(NODE));
 	strcpy(pNode->szData, pszData);
 
-	if(IsEmpty()) g_pTail = pNode;
+	if(IsListEmpty()) g_pTail = pNode;
 	pNode->next = g_pHead;
 	g_pHead = pNode;
 }
 
-void AppendAtTail(char* pszData)
+void AppendNodeAtTail(char* pszData)
 {
 	NODE* pNode = (NODE*)malloc(sizeof(NODE));
 	memset(pNode, 0, sizeof(NODE));
 	strcpy(pNode->szData, pszData);
 
-	if(IsEmpty()) g_pHead = pNode;
+	if(IsListEmpty()) g_pHead = pNode;
 	else		  g_pTail->next = pNode;
 	g_pTail = pNode;
 
 #if 0 //when not using g_pTail
-	if(IsEmpty())
+	if(IsListEmpty())
 	{
 		g_pHead = pNode;
 		// pNode->next = NULL; //implied in memset
@@ -104,7 +105,7 @@ void ReleaseList(void)
 int DeleteData(char* pszData)
 {
 	NODE* pCur = g_pHead;
-	NODE* pPre;
+	NODE* pPrev;
 	while (pCur != NULL)
 	{
 		if (strcmp(pCur->szData, pszData) == 0)
@@ -112,19 +113,19 @@ int DeleteData(char* pszData)
 			printf("DeleteData():[%p] %s next[%p]\n", 
 					pCur, pCur->szData, pCur->next);
 			if (pCur == g_pHead) g_pHead = pCur->next;
-			else                 pPre->next = pCur->next;
+			else                 pPrev->next = pCur->next;
 			
 			if (pCur == g_pTail){
 				if (g_pTail == g_pHead) // If the only one element is being deleted...
 					g_pTail = NULL;
 				else
-					g_pTail = pPre;	
+					g_pTail = pPrev;	
 			} 
 
 			free(pCur);
 			return 1;
 		}
-		pPre = pCur;
+		pPrev = pCur;
 		pCur = pCur->next;
 	}
 
@@ -147,24 +148,24 @@ void ReverseList(){
     g_pHead = pPrev;
 }
 
-void ReverseListRec(NODE * pTmp){
+void ReverseListRecursion(NODE * pTmp){
     if(pTmp->next == NULL)
     {
 		g_pTail = g_pHead;
         g_pHead = pTmp;
         return;
     }
-    ReverseListRec(pTmp->next);
+    ReverseListRecursion(pTmp->next);
     pTmp->next->next = pTmp;
     pTmp->next = NULL;
 }
 
 int main()
 {
-	puts("*** InsertAtHead() ***");
-	InsertAtHead("TEST01");
-	InsertAtHead("TEST02");
-	InsertAtHead("TEST03");
+	puts("*** InsertNodeAtHead() ***");
+	InsertNodeAtHead("TEST01");
+	InsertNodeAtHead("TEST02");
+	InsertNodeAtHead("TEST03");
 	PrintList();
 
 	DeleteData("TEST01");
@@ -174,10 +175,10 @@ int main()
 	DeleteData("TEST03");
 	PrintList();
 
-	puts("*** AppendAtTail() ***");
-	AppendAtTail("TEST01");
-	AppendAtTail("TEST02");
-	AppendAtTail("TEST03");
+	puts("*** AppendNodeAtTail() ***");
+	AppendNodeAtTail("TEST01");
+	AppendNodeAtTail("TEST02");
+	AppendNodeAtTail("TEST03");
 	PrintList();
 
 	DeleteData("TEST01");
@@ -187,18 +188,18 @@ int main()
 	DeleteData("TEST03");
 	PrintList();
 
-	puts("*** InsertAtHead() ***");
-	InsertAtHead("TEST01");
-	InsertAtHead("TEST02");
-	InsertAtHead("TEST03");
+	puts("*** InsertNodeAtHead() ***");
+	InsertNodeAtHead("TEST01");
+	InsertNodeAtHead("TEST02");
+	InsertNodeAtHead("TEST03");
 	PrintList();
 	puts("*** ReverseList() ***");
 	ReverseList();
-	PrintListRec(g_pHead);
+	PrintListRecursion(g_pHead);
 
-	puts("*** ReverseListRec() ***");
-	ReverseListRec(g_pHead);
-	PrintListRec(g_pHead);
+	puts("*** ReverseListRecursion() ***");
+	ReverseListRecursion(g_pHead);
+	PrintListRecursion(g_pHead);
 
 	ReleaseList();
 	return 0;
