@@ -23,7 +23,9 @@ void AppendNodeAtTail(LIST_INFO* pListData, void* pParam);
 
 int DeleteNode(LIST_INFO* pListData, NODE* pDelete);
 int DeleteNodeAt(LIST_INFO* pListData, int idx);
+int DeleteNodeWithKey(LIST_INFO* pListData, const char* pszKey, int (*pfCmpare)(void* , void*));
 
+NODE* FindNodeWithKey(LIST_INFO* pListData, const char* pszKey, int (*pfCmpare)(void* , void*));
 void FreeNode(NODE* pNode);
 NODE* GenerateNewNode(void* pParam);
 

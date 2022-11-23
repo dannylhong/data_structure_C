@@ -68,13 +68,32 @@ int DeleteNodeAt(LIST_INFO* pListData, int idx)
     return DeleteNode(pListData, pNode);
 }
 
+int DeleteNodeWithKey(LIST_INFO* pListData, const char* pszKey, int (*pfCmpare)(void* , void*))
+{
+	NODE* pNode = FindNodeWithKey(pListData, pszKey, pfCmpare);
+
+    return DeleteNode(pListData, pNode);
+}
+
+NODE* FindNodeWithKey(LIST_INFO* pListData, const char* pszKey, int (*pfCmpare)(void* , void*))
+{
+	NODE* pTmp = pListData->pHead;
+	while (pTmp != NULL)
+    {
+        if (pfCmpare(pTmp->pData, pszKey) == 0)
+		{
+            return pTmp;
+        }
+		pTmp = pTmp->next;
+    }
+    return NULL;
+}
+
 void FreeNode(NODE* pNode)
 {
     free(pNode->pData);
     free(pNode);
 }
-
-
 
 //////////////////////////////////////////////////////////////////////////////////
 // pParam: the caller is responsible for the memory allocation and initialization.

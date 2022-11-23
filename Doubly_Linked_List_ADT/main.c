@@ -15,8 +15,7 @@ typedef struct USER_DATA {
     const char* (*GetVal)(struct USER_DATA*);
 } USER_DATA; // think of it as dictionary
 
-int DeleteNodeWithName(LIST_INFO* pListData, const char* pszKey);
-NODE* FindNodeWithKey(LIST_INFO* pListData, const char* pszKey);
+int KeyCompare(void* pUserData, void* pszKey);
 
 USER_DATA* GenerateNewData(const char* pszName, const char* pszPhone);
 const char* GetKeyFromUserData(USER_DATA* pUser);
@@ -54,11 +53,11 @@ int main()
     ReverseList(&userList01);
     PrintList(&userList01);
 
-    DeleteNodeWithName(&userList01, "Samuel Hong");
+    DeleteNodeWithKey(&userList01, "Samuel Hong", KeyCompare);
     PrintList(&userList01);
-    DeleteNodeWithName(&userList01, "Yoomin Hong");
+    DeleteNodeWithKey(&userList01, "Yoomin Hong", KeyCompare);
     PrintList(&userList01);
-    DeleteNodeWithName(&userList01, "Yeere Min");
+    DeleteNodeWithKey(&userList01, "Yeere Min", KeyCompare);
     PrintList(&userList01);
 
     ReverseList(&userList01);
@@ -87,29 +86,6 @@ int main()
     return 0;
 }
 
-int DeleteNodeWithName(LIST_INFO* pListData, const char* pszKey)
-{
-	NODE* pNode = FindNodeWithKey(pListData, pszKey);
-
-    return DeleteNode(pListData, pNode);
-}
-
-NODE* FindNodeWithKey(LIST_INFO* pListData, const char* pszKey)
-{
-	NODE* pTmp = pListData->pHead;
-    const char* (*pfGetKey)(USER_DATA*) = NULL;
-	while (pTmp != NULL)
-    {
-        pfGetKey = ((USER_DATA*)pTmp->pData)->GetKey;
-        if (strcmp(pfGetKey(pTmp->pData), pszKey) == 0)
-		{
-            return pTmp;
-        }
-		pTmp = pTmp->next;
-    }
-    return NULL;
-}
-
 USER_DATA* GenerateNewData(const char* pszName, const char* pszPhone)
 {
     USER_DATA* pNewData = (USER_DATA*)malloc(sizeof(USER_DATA));
@@ -131,6 +107,15 @@ const char* GetKeyFromUserData(USER_DATA* pUser)
 const char* GetValFromUserData(USER_DATA* pUser)
 {
     return pUser->szPhone;
+}
+
+int KeyCompare(void* pUserData, void* pszKey)
+{
+    USER_DATA* pData = pUserData;
+    const char* (*pfGetKey)(USER_DATA*) = NULL;
+    pfGetKey = pData->GetKey;
+
+    return strcmp(pfGetKey(pData), (const char*)pszKey);
 }
 
 void PrintList(LIST_INFO* pListData)
