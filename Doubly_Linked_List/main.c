@@ -25,8 +25,7 @@ void PrintList(void)
 				pTmp, pTmp->prev, pTmp->szData, pTmp->next);
 		pTmp = pTmp->next;
 	}
-    printf("  g_pTail[%p]\n", g_pTail);
-	putchar('\n');
+    printf("  g_pTail[%p]\n\n", g_pTail);
 }
 
 void PrintListRecursion(NODE* pTmp)
@@ -58,7 +57,22 @@ void ReleaseList(void)
     g_nSize = 0;
 }
 
-NODE* FindNode(const char* pszData)
+void ReleaseListRecursion(NODE* pTmp)
+{
+    if (pTmp == NULL)
+    {
+        g_pHead = NULL;
+        g_pTail = NULL;
+        g_nSize = 0;
+    	printf("\nReleaseListRecursion()\n");
+        return;
+    }
+    ReleaseListRecursion(pTmp->next);
+    printf("Delete: [%p] %s\n", pTmp, pTmp->szData);
+    free(pTmp);
+}
+
+NODE* FindNodeWithKey(const char* pszData)
 {
 	NODE* pTmp = g_pHead;
 	while (pTmp != NULL)
@@ -72,10 +86,8 @@ NODE* FindNode(const char* pszData)
     return NULL;
 }
 
-int DeleteNode(const char* pszData)
+int DeleteNode(NODE* pNode)
 {
-	NODE* pNode = FindNode(pszData);
-
     if(pNode == NULL) return -1;
 
     // Link information of the node ahead
@@ -87,12 +99,19 @@ int DeleteNode(const char* pszData)
     else                 pNode->next->prev = pNode->prev;
 
     printf("DeleteNode():\n         [%14p] prev[%14p], %s, next[%14p]\n\n",
-				pNode, pNode->prev, pNode->szData, pNode->next);
+				            pNode, pNode->prev, pNode->szData, pNode->next);
 
     free(pNode);
     g_nSize--;
     
 	return 0;
+}
+
+int DeleteNodeWithName(const char* pszData)
+{
+	NODE* pNode = FindNodeWithKey(pszData);
+
+    return DeleteNode(pNode);
 }
 
 int GetListSize()
@@ -122,11 +141,18 @@ NODE* GetNodeAt(int idx)
     return pTmp;
 }
 
-void InsertNode(NODE* pTmp, const char* pszData)
+NODE* GenerateNewNode(const char* pszData)
 {
     NODE* pNode = (NODE*)malloc(sizeof(NODE));
 	memset(pNode, 0, sizeof(NODE));
 	strcpy(pNode->szData, pszData);
+    
+    return pNode;
+}
+
+void InsertNode(NODE* pTmp, const char* pszData)
+{
+    NODE* pNode = GenerateNewNode(pszData);
 
     // Link information of the new node
     if(pTmp == NULL) pNode->prev = NULL;
@@ -157,9 +183,7 @@ int InsertNodeAt(int idx, const char* pszData)
 
 int AppendNode(NODE* pTmp, const char* pszData)
 {
-    NODE* pNode = (NODE*)malloc(sizeof(NODE));
-	memset(pNode, 0, sizeof(NODE));
-	strcpy(pNode->szData, pszData);
+    NODE* pNode = GenerateNewNode(pszData);
 
     // Link information of the new node
     if(pTmp == NULL) pNode->next = NULL;
@@ -190,23 +214,9 @@ int AppendNodeAt(int idx, const char* pszData)
 
 int DeleteNodeAt(int idx)
 {
-	NODE* pNode = GetNodeAt(idx);
+    NODE* pNode = GetNodeAt(idx);
 
-    if(pNode == NULL) return -1;
-
-    if(pNode == g_pHead) g_pHead = pNode->next;
-    else                 pNode->prev->next = pNode->next;
-
-    if(pNode == g_pTail) g_pTail = pNode->prev;
-    else                 pNode->next->prev = pNode->prev;
-
-    printf("DeleteNodeAt():\n         [%14p] prev[%14p], %s, next[%14p]\n\n",
-				pNode, pNode->prev, pNode->szData, pNode->next);
-
-    free(pNode);
-    g_nSize--;
-    
-	return 0;
+    return DeleteNode(pNode);
 }
 
 
@@ -226,7 +236,7 @@ void AppendNodeAtTail(const char* pszData)
 
 void ReverseList()
 {
-	g_pTail = g_pHead;
+    g_pTail = g_pHead;
 
     NODE * pCur, * pPrev, * pNext;
     pCur = g_pHead;
@@ -259,87 +269,87 @@ void ReverseListRecursion(NODE * pTmp)
 
 int main()
 {
-	puts("*** InsertNodeAtHead() ***");
-	InsertNodeAtHead("TEST01");
-	InsertNodeAtHead("TEST02");
-	InsertNodeAtHead("TEST03");
-	PrintList();
+    puts("*** InsertNodeAtHead() ***");
+    InsertNodeAtHead("TEST01");
+    InsertNodeAtHead("TEST02");
+    InsertNodeAtHead("TEST03");
+    PrintList();
 
-	puts("*** AppendNodeAtTail() ***");
-	AppendNodeAtTail("TEST04");
-	AppendNodeAtTail("TEST05");
-	AppendNodeAtTail("TEST06");
-	PrintList();
+    puts("*** AppendNodeAtTail() ***");
+    AppendNodeAtTail("TEST04");
+    AppendNodeAtTail("TEST05");
+    AppendNodeAtTail("TEST06");
+    PrintList();
 
-	DeleteNode("TEST02");
-	PrintList();
-	DeleteNode("TEST04");
-	PrintList();
-	DeleteNode("TEST06");
-	PrintList();
-    DeleteNode("TEST01");
-	PrintList();
-	DeleteNode("TEST03");
-	PrintList();
-	DeleteNode("TEST05");
-	PrintList();
+    DeleteNodeWithName("TEST02");
+    PrintList();
+    DeleteNodeWithName("TEST04");
+    PrintList();
+    DeleteNodeWithName("TEST06");
+    PrintList();
+    DeleteNodeWithName("TEST01");
+    PrintList();
+    DeleteNodeWithName("TEST03");
+    PrintList();
+    DeleteNodeWithName("TEST05");
+    PrintList();
 
-	puts("*** AppendNodeAtTail() ***");
-	AppendNodeAtTail("TEST04");
-	AppendNodeAtTail("TEST05");
-	AppendNodeAtTail("TEST06");
-	PrintList();
+    puts("*** AppendNodeAtTail() ***");
+    AppendNodeAtTail("TEST04");
+    AppendNodeAtTail("TEST05");
+    AppendNodeAtTail("TEST06");
+    PrintList();
 
-	puts("*** InsertNodeAtHead() ***");
-	InsertNodeAtHead("TEST01");
-	InsertNodeAtHead("TEST02");
-	InsertNodeAtHead("TEST03");
-	PrintList();
+    puts("*** InsertNodeAtHead() ***");
+    InsertNodeAtHead("TEST01");
+    InsertNodeAtHead("TEST02");
+    InsertNodeAtHead("TEST03");
+    PrintList();
 
-	puts("*** ReverseList() ***");
-	ReverseList();
-	PrintListRecursion(g_pHead);
+    puts("*** ReverseList() ***");
+    ReverseList();
+    PrintListRecursion(g_pHead);
 
-	puts("*** ReverseListRecursion() ***");
-	ReverseListRecursion(g_pHead);
-	PrintListRecursion(g_pHead);
+    puts("*** ReverseListRecursion() ***");
+    ReverseListRecursion(g_pHead);
+    PrintListRecursion(g_pHead);
 
     puts("*** InsertNodeAt(3, \"TEST12\") ***");
     InsertNodeAt(3, "TEST12");
-	PrintList();
+    PrintList();
     puts("*** InsertNodeAt(0, \"TEST10\") ***");
     InsertNodeAt(0, "TEST10");
-	PrintList();
+    PrintList();
     puts("*** InsertNodeAt(6, \"TEST11\") ***");
     InsertNodeAt(6, "TEST11");
-	PrintList();
+    PrintList();
     puts("*** AppendNodeAt(3, \"TEST13\") ***");
     AppendNodeAt(3, "TEST13");
-	PrintList();
+    PrintList();
     puts("*** AppendNodeAt(0, \"TEST14\") ***");
     AppendNodeAt(0, "TEST14");
-	PrintList();
+    PrintList();
     puts("*** AppendNodeAt(GetListLength()-1, \"TEST15\") ***");
     AppendNodeAt(GetListLength()-1, "TEST15");
-	PrintList();
-
-	puts("*** ReverseList() ***");
-	ReverseList();
-	PrintListRecursion(g_pHead);
-
-	puts("*** ReverseListRecursion() ***");
-	ReverseListRecursion(g_pHead);
-	PrintListRecursion(g_pHead);
-
-    DeleteNodeAt(3);
-	PrintList();
-    DeleteNodeAt(0);
-	PrintList();
-    DeleteNodeAt(GetListLength()-1);
-	PrintList();
-
-	ReleaseList();
     PrintList();
 
-	return 0;
+    puts("*** ReverseList() ***");
+    ReverseList();
+    PrintListRecursion(g_pHead);
+
+    puts("*** ReverseListRecursion() ***");
+    ReverseListRecursion(g_pHead);
+    PrintListRecursion(g_pHead);
+
+    DeleteNodeAt(3);
+    PrintList();
+    DeleteNodeAt(0);
+    PrintList();
+    DeleteNodeAt(GetListLength()-1);
+    PrintList();
+
+    ReleaseListRecursion(g_pHead);
+    PrintList();
+
+    return 0;
 }
