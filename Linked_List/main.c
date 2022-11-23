@@ -49,32 +49,38 @@ void PrintListRecursion(NODE* pTmp)
 	PrintListRecursion(pTmp->next);
 }
 
-void InsertNodeAtHead(char* pszData)
+NODE* GenerateNewNode(const char* pszData)
 {
 	NODE* pNode = (NODE*)malloc(sizeof(NODE));
 	memset(pNode, 0, sizeof(NODE));
 	strcpy(pNode->szData, pszData);
+
+	return pNode;
+}
+
+void InsertNodeAtHead(const char* pszData)
+{
+	NODE* pNode = GenerateNewNode(pszData);
 
 	if(IsListEmpty()) g_pTail = pNode;
 	pNode->next = g_pHead;
 	g_pHead = pNode;
 }
 
-void AppendNodeAtTail(char* pszData)
+void AppendNodeAtTail(const char* pszData)
 {
-	NODE* pNode = (NODE*)malloc(sizeof(NODE));
-	memset(pNode, 0, sizeof(NODE));
-	strcpy(pNode->szData, pszData);
+	NODE* pNode = GenerateNewNode(pszData);
+
+#if 1 //when using g_pTail
 
 	if(IsListEmpty()) g_pHead = pNode;
 	else		  g_pTail->next = pNode;
 	g_pTail = pNode;
 
-#if 0 //when not using g_pTail
+#else 0 //when not using g_pTail
 	if(IsListEmpty())
 	{
 		g_pHead = pNode;
-		// pNode->next = NULL; //implied in memset
 		return;
 	}
 
@@ -83,7 +89,6 @@ void AppendNodeAtTail(char* pszData)
 		pTmp = pTmp->next;
 
     pTmp->next = pNode;
-    // pNode->next = NULL; //implied in memset
 #endif	
 }
 
