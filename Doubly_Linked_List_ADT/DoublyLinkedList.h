@@ -23,9 +23,9 @@ void AppendNodeAtTail(LIST_INFO* pListData, void* pParam);
 
 int DeleteNode(LIST_INFO* pListData, NODE* pDelete);
 int DeleteNodeAt(LIST_INFO* pListData, int idx);
-int DeleteNodeWithKey(LIST_INFO* pListData, const char* pszKey, int (*pfCmpare)(void* , void*));
+int DeleteNodeWithKey(LIST_INFO* pListData, void* pszKey, int (*pfCmpare)(void* , void*));
 
-NODE* FindNodeWithKey(LIST_INFO* pListData, const char* pszKey, int (*pfCmpare)(void* , void*));
+NODE* FindNodeWithKey(LIST_INFO* pListData, void* pszKey, int (*pfCmpare)(void* , void*));
 void FreeNode(NODE* pNode);
 NODE* GenerateNewNode(void* pParam);
 
@@ -40,6 +40,8 @@ int InsertNodeAt(LIST_INFO* pListData, int idx, void* pParam);
 void InsertNodeAtHead(LIST_INFO* pListData, void* pParam);
 
 int IsListEmpty();
+
+void PrintList(LIST_INFO* pListData, void (*pfPrint)(void*));
 
 void ReleaseList(LIST_INFO* pListData);
 void ReverseList(LIST_INFO* pListData);

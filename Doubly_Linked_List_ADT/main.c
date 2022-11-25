@@ -21,7 +21,7 @@ USER_DATA* GenerateNewData(const char* pszName, const char* pszPhone);
 const char* GetKeyFromUserData(USER_DATA* pUser);
 const char* GetValFromUserData(USER_DATA* pUser);
 
-void PrintList(LIST_INFO* pListData);
+void PrintUserData(void* pUser);
 
 int main()
 {
@@ -30,43 +30,42 @@ int main()
 
     USER_DATA* pNewData = NULL;
     
-    pNewData = GenerateNewData("Daniel Hong", "010-1234-1234");
+    pNewData = GenerateNewData("Daniel", "010-1234-1234");
     InsertNodeAtHead(&userList01, pNewData);
-    PrintList(&userList01);
+    PrintList(&userList01, PrintUserData);
     
-    pNewData = GenerateNewData("Samuel Hong", "010-4321-1234");
+    pNewData = GenerateNewData("Dennis", "010-4321-1234");
     InsertNodeAtHead(&userList01, pNewData);
-    PrintList(&userList01);
+    PrintList(&userList01, PrintUserData);
     
-    pNewData = GenerateNewData("Yoomin Hong", "010-4321-4321");
+    pNewData = GenerateNewData("Dove", "010-4321-4321");
     AppendNodeAtTail(&userList01, pNewData);
-    PrintList(&userList01);
+    PrintList(&userList01, PrintUserData);
 
-    pNewData = GenerateNewData("Sarang Hong", "010-1234-5678");
+    pNewData = GenerateNewData("Dorothy", "010-1234-5678");
     AppendNodeAt(&userList01, 0, pNewData);
-    PrintList(&userList01);
+    PrintList(&userList01, PrintUserData);
 
-    pNewData = GenerateNewData("Yeere Min", "010-4567-9876");
+    pNewData = GenerateNewData("Donald", "010-4567-9876");
     InsertNodeAt(&userList01, 2, pNewData);
-    PrintList(&userList01);
+    PrintList(&userList01, PrintUserData);
 
     ReverseList(&userList01);
-    PrintList(&userList01);
+    PrintList(&userList01, PrintUserData);
 
     DeleteNodeWithKey(&userList01, "Samuel Hong", KeyCompare);
-    PrintList(&userList01);
+    PrintList(&userList01, PrintUserData);
     DeleteNodeWithKey(&userList01, "Yoomin Hong", KeyCompare);
-    PrintList(&userList01);
+    PrintList(&userList01, PrintUserData);
     DeleteNodeWithKey(&userList01, "Yeere Min", KeyCompare);
-    PrintList(&userList01);
+    PrintList(&userList01, PrintUserData);
 
     ReverseList(&userList01);
-    PrintList(&userList01);
+    PrintList(&userList01, PrintUserData);
 
 
     LIST_INFO userList02 = { 0 };
     InitList(&userList02);
-
 
     pNewData = GenerateNewData("Test01", "010-1234-1234");
     InsertNodeAtHead(&userList02, pNewData);
@@ -75,13 +74,13 @@ int main()
     pNewData = GenerateNewData("Test03", "010-4321-4321");
     AppendNodeAtTail(&userList02, pNewData);
     
-    PrintList(&userList02);
-    PrintList(&userList01);
+    PrintList(&userList02, PrintUserData);
+    PrintList(&userList01, PrintUserData);
 
     ReleaseList(&userList01);
     ReleaseList(&userList02);
-    PrintList(&userList01);
-    PrintList(&userList02);
+    PrintList(&userList01, PrintUserData);
+    PrintList(&userList02, PrintUserData);
 
     return 0;
 }
@@ -118,18 +117,9 @@ int KeyCompare(void* pUserData, void* pszKey)
     return strcmp(pfGetKey(pData), (const char*)pszKey);
 }
 
-void PrintList(LIST_INFO* pListData)
+void PrintUserData(void* pUser)
 {
-	printf("\nPrintList():\n  g_nSize: %d\n  g_pHead[%p]\n", pListData->nSize, pListData->pHead);
-	NODE* pTmp = pListData->pHead;
-    const char* (*pfGetKey)(USER_DATA*) = NULL;
-
-	while (pTmp != NULL)
-	{
-        USER_DATA* pUser = pTmp->pData;
-		printf("         [%14p] prev[%14p], name: %15s, phone: %15s, next[%14p]\n",
-				        pTmp, pTmp->prev, pUser->GetKey(pUser), pUser->GetVal(pUser), pTmp->next);
-		pTmp = pTmp->next;
-	}
-    printf("  g_pTail[%p]\n\n", pListData->pTail);
+    printf("name: %8s, phone: %13s\n", 
+            ((USER_DATA*)pUser)->GetKey((USER_DATA*)pUser), 
+            ((USER_DATA*)pUser)->GetVal((USER_DATA*)pUser));
 }

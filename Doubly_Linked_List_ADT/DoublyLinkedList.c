@@ -68,14 +68,14 @@ int DeleteNodeAt(LIST_INFO* pListData, int idx)
     return DeleteNode(pListData, pNode);
 }
 
-int DeleteNodeWithKey(LIST_INFO* pListData, const char* pszKey, int (*pfCmpare)(void* , void*))
+int DeleteNodeWithKey(LIST_INFO* pListData, void* pszKey, int (*pfCmpare)(void* , void*))
 {
 	NODE* pNode = FindNodeWithKey(pListData, pszKey, pfCmpare);
 
     return DeleteNode(pListData, pNode);
 }
 
-NODE* FindNodeWithKey(LIST_INFO* pListData, const char* pszKey, int (*pfCmpare)(void* , void*))
+NODE* FindNodeWithKey(LIST_INFO* pListData, void* pszKey, int (*pfCmpare)(void* , void*))
 {
 	NODE* pTmp = pListData->pHead;
 	while (pTmp != NULL)
@@ -177,6 +177,21 @@ void InsertNodeAtHead(LIST_INFO* pListData, void* pParam)
 int IsListEmpty(LIST_INFO* pListData)
 {
     return GetListSize(pListData);
+}
+
+void PrintList(LIST_INFO* pListData, void (*pfPrint)(void*))
+{
+	printf("\nPrintList():\n  g_nSize: %d\n  g_pHead[%p]\n", pListData->nSize, pListData->pHead);
+	NODE* pTmp = pListData->pHead;
+
+	while (pTmp != NULL)
+	{
+        printf("         [%14p], prev[%14p], next[%14p]   ",
+				        pTmp, pTmp->prev, pTmp->next);
+        pfPrint(pTmp->pData);
+		pTmp = pTmp->next;
+	}
+    printf("  g_pTail[%p]\n\n", pListData->pTail);
 }
 
 void ReleaseList(LIST_INFO* pListData)
