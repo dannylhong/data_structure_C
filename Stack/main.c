@@ -3,17 +3,20 @@
 #include "Stack.h"
 
 char* GenerateNewData(const char* ch);
-int infixToPostfix(char* exp);
+int infixToPostfix(STACK_INFO* pStack, char* exp);
 int isOperand(char ch);
 int Prec(char ch);
 void Print(void* pChar);
 
 int main()
 {
+    STACK_INFO userStack = { 0 };
+    InitStack(&userStack);
+
     char exp[] = "a+b*(c^d-e)^(f+g*h)-i";
   
     // Function call
-    infixToPostfix(exp);
+    infixToPostfix(&userStack, exp);
 
     printf("%s\n\n", exp);
 
@@ -30,7 +33,7 @@ char* GenerateNewData(const char* ch)
 // The main function that
 // converts given infix expression
 // to postfix expression.
-int infixToPostfix(char* exp)
+int infixToPostfix(STACK_INFO* pStack, char* exp)
 {
     int i, k;
   
@@ -41,41 +44,41 @@ int infixToPostfix(char* exp)
         if (isOperand(exp[i]))
             exp[++k] = exp[i];
         
-        // If the scanned character is an
+        // If pStackthe scanned character is an
         // ‘(‘, push it to the stack.
         else if (exp[i] == '(')
-            Push(GenerateNewData(&exp[i]));
+            Push(pStack, GenerateNewData(&exp[i]));
 
         // If the scanned character is an ‘)’,
         // pop and output from the stack
         // until an ‘(‘ is encountered.
         else if (exp[i] == ')') {
-            while (!IsEmpty() && *(char*)Top() != '('){
-                char* pData = Pop();
+            while (!IsEmpty(pStack) && *(char*)Top(pStack) != '('){
+                char* pData = Pop(pStack);
                 exp[++k] = *pData;
                 free(pData);
             }
-            if (!IsEmpty() && *(char*)Top() != '(')
+            if (!IsEmpty(pStack) && *(char*)Top(pStack) != '(')
                 return -1; // invalid expression
             else
-                free(Pop());
+                free(Pop(pStack));
         }
   
         else // an operator is encountered
         {
-            while (!IsEmpty()
-                   && Prec(exp[i]) <= Prec(*(char*)Top())){
-                char* pData = Pop();
+            while (!IsEmpty(pStack)
+                   && Prec(exp[i]) <= Prec(*(char*)Top(pStack))){
+                char* pData = Pop(pStack);
                 exp[++k] = *pData;
                 free(pData);
             }
-            Push(GenerateNewData(&exp[i]));
+            Push(pStack, GenerateNewData(&exp[i]));
         }
     }
   
     // pop all the operators from the stack
-    while (!IsEmpty()){
-        char* pData = Pop();
+    while (!IsEmpty(pStack)){
+        char* pData = Pop(pStack);
         exp[++k] = *pData;
         free(pData);
     }
